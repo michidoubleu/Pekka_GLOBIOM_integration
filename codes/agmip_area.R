@@ -20,7 +20,9 @@ scen_df <- tibble::tribble(
 source("./codes/mapping_logic.R") # Recommended: put the tribble in a separate file to keep this clean
 
 # 3. Process AREA
-df_area_clean <- df_area %>% 
+df_area_filtered <- filter_area_safely(df_area)
+
+df_area_clean <- df_area_filtered %>% 
   filter(item == "total_forest_area") %>%
   mutate(
     value = value * 1000,
