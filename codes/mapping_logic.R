@@ -33,6 +33,7 @@ mapping_data <- tribble(
   "Sweden", "SWE", "SWEReg", "SWE",
   
   # --- Regional/Macro Groups (Full Country Names) ---
+  "ANZ","ANZ",
   "Canada", "CAN", "CanadaReg", "CAN",
   "USA", "USA", "USAReg", "USA",
   "Brazil", "BRA", "BrazilReg", "BRA",

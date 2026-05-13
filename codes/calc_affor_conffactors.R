@@ -1,6 +1,5 @@
-# 1. Load Data
-df_emis <- m["CARBON_SINK"]$records
-colnames(df_emis) <- c("region","item", "unit" ,"ssp","scen1","For_Scen","year","value")
+df_area <- m["Harvest_area_compare"]$records
+colnames(df_area) <- c("region","item","ssp","scen1","For_Scen","year","value")
 
 # 2. Reference Mappings
 scen_df <- tibble::tribble(
@@ -22,11 +21,38 @@ scen_df <- tibble::tribble(
   "RCP4p5",    "Base_EAWET", 
   "RCP4p5",    "Base_FPCAP", 
   "RCP4p5",    "Base_EACAP",
-  "RCP4p5_1",  "Base_FPWDM", 
-  "RCP4p5_2",  "Base_EAWDM",
-  "RCP4p5",    "Base_FPFRS", 
-  "RCP4p5",    "Base_EAFRS"
+  "RCP4p5",    "Base_FPWDM", 
+  "RCP4p5",    "Base_EAWDM",
+  "RCP4p5_1",  "Base_FPFRS", 
+  "RCP4p5_2",  "Base_EAFRS"
 )
+
+# Use your mapping logic from the previous prompt here
+# (Defining mapping_data and full_mapping)
+source("./codes/mapping_logic.R") # Recommended: put the tribble in a separate file to keep this clean
+
+# 3. Process AREA
+#df_area_filtered <- filter_area_safely(df_area)
+
+df_area_clean <- df_area %>% 
+  filter(item == "Affor") %>%
+  mutate(
+    value = value * 1000,
+    variable = "AREA",
+    item = "FOR"
+  ) %>%
+  select(region, For_Scen, variable, item, year, value) %>%
+  inner_join(scen_df, by = "For_Scen", relationship = "many-to-many") %>%
+  inner_join(full_mapping, by = c("region" = "source_label")) %>%
+  group_by(agmip_target, variable, item, scens, year) %>%
+  summarise(value = sum(value, na.rm = TRUE), .groups = "drop") %>% filter(scens=="BASE")
+
+
+
+# 1. Load Data
+df_emis <- m["CARBON_SINK"]$records
+colnames(df_emis) <- c("region","item", "unit" ,"ssp","scen1","For_Scen","year","value")
+
 
 # --- NEW FILTER STEP TO PREVENT DOUBLE COUNTING ---
 # We define a list of 'preferred' region labels to avoid overlapping data.
@@ -73,33 +99,17 @@ df_emis_filtered <- df_emis_filtered %>%
 
 # 2. Process EMISSIONS (using the filtered dataframe)
 df_emis_clean <- df_emis_filtered %>% 
-  filter(item %in% c("HWP", "Forest_old")) %>% 
+  filter(item %in% c("Forest_affor")) %>% 
   group_by(region, For_Scen, year) %>% 
   summarise(value = sum(value), .groups = "drop") %>%
-  mutate(item_list = list(c("FOR", "TOT"))) %>% unnest(item_list) %>%
-  mutate(variable_list = list(c("EMIS", "ECO2"))) %>% unnest(variable_list) %>%
-  rename(item = item_list, variable = variable_list) %>%
+  mutate(variable = "EMIS",
+         item = "FOR") %>%
   inner_join(scen_df, by = "For_Scen", relationship = "many-to-many") %>%
   inner_join(full_mapping, by = c("region" = "source_label")) %>%
   group_by(agmip_target, variable, item, scens, year) %>%
-  summarise(value = sum(value, na.rm = TRUE), .groups = "drop")
+  summarise(value = sum(value, na.rm = TRUE), .groups = "drop") %>% filter(scens=="BASE")
 
-# Step A: Format Forest Emissions to match Main Result structure
-forest_to_add <- df_emis_clean %>%
-  # Match column names exactly
-  rename(
-    Region = agmip_target,
-    Variable = variable,
-    Item = item,
-    Scenario = scens, # We fix case in next step
-    Year = year,
-    Value = value
-  ) %>%
-  mutate(
-    Year = as.integer(as.character(Year)), # Ensure Year is integer
-    Model = "GLOBIOM",
-    Unit = "MtCO2e",
-  ) %>%
-  select(Model, Scenario, Region, Item, Variable, Year, Unit, Value)
 
-saveRDS(forest_to_add, "./output/copy2openinput/processed_forest_HWP_emis.rds")
+conv.factor <- bind_rows(df_area_clean, df_emis_clean) %>% pivot_wider(names_from = "variable", values_from = "value") %>% mutate(sink.fac=EMIS/AREA) %>% dplyr::select(agmip_target, item, year, sink.fac)
+
+saveRDS(conv.factor, file = "output/copy2openinput/affor_emis_factors.rds")
