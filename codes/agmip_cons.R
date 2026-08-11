@@ -5,32 +5,6 @@ library(tidyverse)
 df_cons <- m["Consumption_compare"]$records
 colnames(df_cons) <- c("region","item","ssp","scen1","For_Scen","year","value")
 
-# 2. Reference Mappings
-scen_df <- tibble::tribble(
-  ~For_Scen,   ~scens,
-  "RCP4p5",    "BASE", 
-  "RCP4p5_1",  "FP", 
-  "RCP4p5_2",  "EA",
-  "RCP4p5",    "Base_FPSOC", 
-  "RCP4p5",    "Base_EASOC",
-  "RCP4p5",    "Base_FPSWF", 
-  "RCP4p5",    "Base_EASWF",
-  "RCP4p5",    "Base_FPFRT", 
-  "RCP4p5",    "Base_EAFRT",
-  "RCP4p5",    "Base_FPPST", 
-  "RCP4p5",    "Base_EAPST",
-  "RCP4p5",    "Base_FPORG", 
-  "RCP4p5",    "Base_EAORG",
-  "RCP4p5",    "Base_FPWET",
-  "RCP4p5",    "Base_EAWET", 
-  "RCP4p5",    "Base_FPCAP", 
-  "RCP4p5",    "Base_EACAP",
-  "RCP4p5_1",  "Base_FPWDM", 
-  "RCP4p5_2",  "Base_EAWDM",
-  "RCP4p5",    "Base_FPFRS", 
-  "RCP4p5",    "Base_EAFRS"
-)
-
 
 # 2. Map, Filter, and Aggregate
 df_cons_clean <- df_cons %>%
@@ -59,6 +33,22 @@ df_cons_clean <- df_cons %>%
   # Aggregate the values
   group_by(agmip_target, variable, item_mapped, scens, year) %>%
   summarise(value = sum(value, na.rm = TRUE)*1000000, .groups = "drop")
+
+
+# Add total forest consumption ("FOR")
+df_cons_total <- df_cons_clean %>%
+  group_by(agmip_target, variable, scens, year) %>%
+  summarise(
+    value = sum(value, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(item_mapped = "FOR")
+
+# Combine detailed items and total
+df_cons_clean <- bind_rows(df_cons_clean, df_cons_total)
+
+
+
 
 # 3. Format into the Final Tidy Structure
 forest_cons_tidy <- df_cons_clean %>%

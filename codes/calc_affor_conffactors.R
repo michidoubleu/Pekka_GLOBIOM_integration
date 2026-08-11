@@ -1,31 +1,6 @@
 df_area <- m["Harvest_area_compare"]$records
 colnames(df_area) <- c("region","item","ssp","scen1","For_Scen","year","value")
 
-# 2. Reference Mappings
-scen_df <- tibble::tribble(
-  ~For_Scen,   ~scens,
-  "RCP4p5",    "BASE", 
-  "RCP4p5_1",  "FP", 
-  "RCP4p5_2",  "EA",
-  "RCP4p5",    "Base_FPSOC", 
-  "RCP4p5",    "Base_EASOC",
-  "RCP4p5",    "Base_FPSWF", 
-  "RCP4p5",    "Base_EASWF",
-  "RCP4p5",    "Base_FPFRT", 
-  "RCP4p5",    "Base_EAFRT",
-  "RCP4p5",    "Base_FPPST", 
-  "RCP4p5",    "Base_EAPST",
-  "RCP4p5",    "Base_FPORG", 
-  "RCP4p5",    "Base_EAORG",
-  "RCP4p5",    "Base_FPWET",
-  "RCP4p5",    "Base_EAWET", 
-  "RCP4p5",    "Base_FPCAP", 
-  "RCP4p5",    "Base_EACAP",
-  "RCP4p5",    "Base_FPWDM", 
-  "RCP4p5",    "Base_EAWDM",
-  "RCP4p5_1",  "Base_FPFRS", 
-  "RCP4p5_2",  "Base_EAFRS"
-)
 
 # Use your mapping logic from the previous prompt here
 # (Defining mapping_data and full_mapping)

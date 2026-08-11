@@ -81,6 +81,17 @@ extra_eur <- tribble(
   "EU27", "EUR"
 )
 
+# Extra AgMIP aggregate codes: BLX (Belgium+Luxembourg) and GCM (Greece+Cyprus+Malta).
+# Additive alongside the individual BEL/LUX/GRC/CYP/MLT codes, same pattern as EUE/EUR.
+blx_gcm_mapping <- tribble(
+  ~source_label, ~agmip_target,
+  "Belgium",    "BLX", "BELReg", "BLX",
+  "Luxembourg", "BLX", "LUXReg", "BLX",
+  "Greece",     "GCM", "GRCReg", "GCM",
+  "Cyprus",     "GCM", "CYPReg", "GCM",
+  "Malta",      "GCM", "MLTReg", "GCM"
+)
+
 # 3. Combine everything
-full_mapping <- bind_rows(mapping_data, eue_mapping, eur_mapping, extra_eur) %>%
+full_mapping <- bind_rows(mapping_data, eue_mapping, eur_mapping, extra_eur, blx_gcm_mapping) %>%
   distinct()

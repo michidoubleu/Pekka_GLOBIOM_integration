@@ -16,6 +16,20 @@ yield_data_raw <- tibble::tribble(
   "EU27", 5.8
 )
 
+# BLX (Belgium+Luxembourg) and GCM (Greece+Cyprus+Malta): yield is an intensity
+# (m3/ha), so aggregates are averaged rather than summed. Malta has no source
+# value above, so GCM is averaged over Greece and Cyprus only.
+yield_data_raw <- yield_data_raw %>%
+  bind_rows(
+    tibble::tibble(
+      Country = c("BLX", "GCM"),
+      Value = c(
+        mean(yield_data_raw$Value[yield_data_raw$Country %in% c("Belgium", "Luxembourg")], na.rm = TRUE),
+        mean(yield_data_raw$Value[yield_data_raw$Country %in% c("Greece", "Cyprus", "Malta")], na.rm = TRUE)
+      )
+    )
+  )
+
 # 2. Define the mapping to your 3-letter target codes
 # Note: "UK" wasn't in your target list array, so I mapped it to standard "GBR". 
 # "EU27" is mapped to "EUE". Adjust these two if your model expects something else (like "EUR").
@@ -28,7 +42,8 @@ region_map <- c(
   "Latvia" = "LVA", "Lithuania" = "LTU", "Luxembourg" = "LUX",
   "Netherlands" = "NLD", "Poland" = "POL", "Portugal" = "PRT",
   "Romania" = "ROU", "Slovakia" = "SVK", "Slovenia" = "SVN",
-  "Spain" = "ESP", "Sweden" = "SWE", "UK" = "GBR", "EU27" = "EUE"
+  "Spain" = "ESP", "Sweden" = "SWE", "UK" = "GBR", "EU27" = "EUE",
+  "BLX" = "BLX", "GCM" = "GCM"
 )
 
 # 3. Extract the unique scenarios and years from your existing tidy dataframe

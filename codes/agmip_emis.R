@@ -2,31 +2,6 @@
 df_emis <- m["CARBON_SINK"]$records
 colnames(df_emis) <- c("region","item", "unit" ,"ssp","scen1","For_Scen","year","value")
 
-# 2. Reference Mappings
-scen_df <- tibble::tribble(
-  ~For_Scen,   ~scens,
-  "RCP4p5",    "BASE", 
-  "RCP4p5_1",  "FP", 
-  "RCP4p5_2",  "EA",
-  "RCP4p5",    "Base_FPSOC", 
-  "RCP4p5",    "Base_EASOC",
-  "RCP4p5",    "Base_FPSWF", 
-  "RCP4p5",    "Base_EASWF",
-  "RCP4p5",    "Base_FPFRT", 
-  "RCP4p5",    "Base_EAFRT",
-  "RCP4p5",    "Base_FPPST", 
-  "RCP4p5",    "Base_EAPST",
-  "RCP4p5",    "Base_FPORG", 
-  "RCP4p5",    "Base_EAORG",
-  "RCP4p5",    "Base_FPWET",
-  "RCP4p5",    "Base_EAWET", 
-  "RCP4p5",    "Base_FPCAP", 
-  "RCP4p5",    "Base_EACAP",
-  "RCP4p5_1",  "Base_FPWDM", 
-  "RCP4p5_2",  "Base_EAWDM",
-  "RCP4p5",    "Base_FPFRS", 
-  "RCP4p5",    "Base_EAFRS"
-)
 
 # --- NEW FILTER STEP TO PREVENT DOUBLE COUNTING ---
 # We define a list of 'preferred' region labels to avoid overlapping data.
